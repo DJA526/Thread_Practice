@@ -22,7 +22,10 @@ public class ThreadDemo {
 			
 			new Thread(()->timmy.move(400)).start();
 			new Thread(()->tammy.move(400)).start();
-			new Thread(()->sammy.move(400)).start();
+			new Thread(()->{
+				sammy.move(400);
+				
+			}).start();
 			
 	}
 }
