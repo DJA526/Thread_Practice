@@ -15,29 +15,32 @@ public class ThreadedNumberSorter {
 	public static void parallelSort(int[] nums) throws InterruptedException {
 		long startTime = System.nanoTime();
 		//Complete this method starting at this point
-		Thread[] threads = new Thread[NUM_THREADS];
 		PriorityQueue<SubArray> queue = new PriorityQueue<SubArray>();
 		for (int i = 0, j = 0; i < TOTAL_NUMS; i += subArraySize, j++) {
-			final int iFinal = i;
-			threads[j] = new Thread(()->{
-				int[] subArray = sort(nums, iFinal, iFinal + subArraySize);
-				SubArray s = new SubArray(subArray, 0, subArraySize);
-				queue.add(s);
-			});
-			threads[j].start();
+			SubArray s = new SubArray(nums, i, i + subArraySize);
+			queue.add(s);
+			s.getThread().start();
 		}
-		for (int j = 0; j < threads.length; j++) {
-			threads[j].join();
+		for (SubArray s : queue) {
+			s.getThread().join();
 		}
-		for (int i = 0; i < nums.length; i++) {
+		System.out.println(Arrays.toString(nums));
+		for (SubArray s : queue) {
+			System.out.println(s.toString());
+		}
+		int[] nums2 = new int[nums.length];
+		for (int i = 0; i < nums2.length; i++) {
 			if (queue.isEmpty()) {
 				break;
 			}
 			SubArray s = queue.remove();
-			nums[i] = s.next();
+			nums2[i] = s.next();
 			if (!s.isDone()) {
 				queue.add(s);
 			}
+		}
+		for (int i = 0; i < nums2.length; i++) {
+			nums[i] = nums2[i];
 		}
 		
 		long totalTime = System.nanoTime() - startTime;
@@ -55,13 +58,12 @@ public class ThreadedNumberSorter {
 	}
 
 	public static void main(String[] args) throws InterruptedException{
-//		int[] nums = new int[TOTAL_NUMS];
-		int[] nums = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		int[] nums = new int[TOTAL_NUMS];
 
-//		Random randGen = new Random();
-//		for (int i = 0; i < TOTAL_NUMS; i++) {
-//			nums[i] = randGen.nextInt(TOTAL_NUMS);
-//		}
+		Random randGen = new Random();
+		for (int i = 0; i < TOTAL_NUMS; i++) {
+			nums[i] = randGen.nextInt(TOTAL_NUMS);
+		}
 
 		printArray(nums);
 		parallelSort(nums);
@@ -69,8 +71,6 @@ public class ThreadedNumberSorter {
 	}
 	
 	private static void printArray(int[] nums){
-		for(int i = 0; i < nums.length; i++){
-			System.out.println(nums[i]);
-		}
+		System.out.println(Arrays.toString(nums));
 	}
 }
