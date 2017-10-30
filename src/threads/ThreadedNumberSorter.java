@@ -5,29 +5,33 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 public class ThreadedNumberSorter {
-	static final int TOTAL_NUMS = 10;
-	static final int NUM_THREADS = 2;
-	static final int subArraySize = TOTAL_NUMS/NUM_THREADS;
+	static int totalNums = 100;
+	static int numThreads = 1;
+	static int subArraySize = totalNums;
 
 	//Complete the method below so that it uses threads to sort the integer array.
 	//Try to get the completion time as short as possible.
 	//Use the printArray method to check sorting accuracy
 	public static void parallelSort(int[] nums) throws InterruptedException {
-		long startTime = System.nanoTime();
+		//System.out.println(Arrays.toString(nums));		
 		//Complete this method starting at this point
 		PriorityQueue<SubArray> queue = new PriorityQueue<SubArray>();
-		for (int i = 0, j = 0; i < TOTAL_NUMS; i += subArraySize, j++) {
+		SubArray[] subArrays = new SubArray[numThreads];
+		for (int i = 0, j = 0; i < totalNums; i += subArraySize, j++) {
 			SubArray s = new SubArray(nums, i, i + subArraySize);
-			queue.add(s);
+			subArrays[j] = s;
 			s.getThread().start();
 		}
-		for (SubArray s : queue) {
+		for (SubArray s : subArrays) {
 			s.getThread().join();
 		}
-		System.out.println(Arrays.toString(nums));
-		for (SubArray s : queue) {
-			System.out.println(s.toString());
+		for (SubArray s : subArrays) {
+			queue.add(s);
 		}
+		//System.out.println(Arrays.toString(nums));
+		//for (SubArray s : queue) {
+		//	System.out.println(s.toString());
+		//}
 		int[] nums2 = new int[nums.length];
 		for (int i = 0; i < nums2.length; i++) {
 			if (queue.isEmpty()) {
@@ -43,31 +47,30 @@ public class ThreadedNumberSorter {
 			nums[i] = nums2[i];
 		}
 		
-		long totalTime = System.nanoTime() - startTime;
-		double timeInSeconds = (double)totalTime / 1_000_000_000;
-		System.out.println("The total computing time in seconds was: " + timeInSeconds);
-	}
-
-	private static int[] sort(int[] nums, int start, int end) {
-		int[] nums2 = new int[end - start + 1];
-		for (int i = start; i < end; i++) {
-			nums2[i - start] = nums[i];
+		//System.out.println(Arrays.toString(nums));
 		}
-		Arrays.sort(nums2);
-		return nums2;
-	}
 
 	public static void main(String[] args) throws InterruptedException{
-		int[] nums = new int[TOTAL_NUMS];
+		int[] nums = new int[totalNums];
 
 		Random randGen = new Random();
-		for (int i = 0; i < TOTAL_NUMS; i++) {
-			nums[i] = randGen.nextInt(TOTAL_NUMS);
+		for (int i = 0; i < totalNums; i++) {
+			nums[i] = randGen.nextInt(totalNums);
 		}
 
 		printArray(nums);
 		parallelSort(nums);
 		printArray(nums);
+	}
+	
+	public static void setTotalNums(int nums) {
+		totalNums = nums;
+		subArraySize = totalNums/numThreads;
+	}
+	
+	public static void setNumThreads(int threads) {
+		numThreads = threads;
+		subArraySize = totalNums/numThreads;
 	}
 	
 	private static void printArray(int[] nums){

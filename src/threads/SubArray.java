@@ -16,7 +16,7 @@ public class SubArray implements Comparable<SubArray> {
 		this.index = start;
 		this.start = start;
 		this.end = end;
-		thread = new Thread(() -> Arrays.sort(fullArray, start, end));
+		thread = new Thread(()->Arrays.sort(fullArray, start, end));
 	}
 
 	public Thread getThread() {
